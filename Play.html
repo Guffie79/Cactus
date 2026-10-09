@@ -203,7 +203,14 @@ input:focus{outline:none;border-color:var(--sun)}
    Colle ici la configuration de ton projet Firebase à la place de null.
    Exemple : window.FIREBASE_CONFIG={apiKey:"...",authDomain:"...",projectId:"...",appId:"..."};
    Tant que c'est null, le jeu marche normalement sans comptes. */
-window.FIREBASE_CONFIG=null;
+window.FIREBASE_CONFIG={
+  apiKey:"AIzaSyA1aKMlGdAuBk4RZMb-DVhBjx6UaPw9O9M",
+  authDomain:"cactus-game-42cef.firebaseapp.com",
+  projectId:"cactus-game-42cef",
+  storageBucket:"cactus-game-42cef.firebasestorage.app",
+  messagingSenderId:"489345149385",
+  appId:"1:489345149385:web:ca2477a1e0af6b6676a018"
+};
 </script>
 <script>
 const R=['A','2','3','4','5','6','7','8','9','10','V','D','R'],SU=['♠','♥','♦','♣'];
@@ -710,7 +717,7 @@ function askCactus(){
 function doCactus(){closeSheet();cactus()}
 function accHtml(){
   const C=window.CC,u=C&&C.user;
-  if(!CC_ON||!C)return `<div class="ov" onclick="if(event.target===this)closeSheet()"><div class="sheet"><h2>Mon compte <button class="x" onclick="closeSheet()" aria-label="Fermer">✕</button></h2><p class="mut">Les comptes ne sont pas encore activés sur ce site.</p></div></div>`;
+  if(!CC_ON||!C)return `<div class="ov" onclick="if(event.target===this)closeSheet()"><div class="sheet"><h2>Mon compte <button class="x" onclick="closeSheet()" aria-label="Fermer">✕</button></h2><p class="mut">${CC_ON?'Impossible de joindre le service de comptes. Désactive ton bloqueur de publicités ou réessaie dans un instant.':'Les comptes ne sont pas encore activés sur ce site.'}</p></div></div>`;
   if(u){const m=C.me||{pts:0,games:0,wins:0};
     return `<div class="ov" onclick="if(event.target===this)closeSheet()"><div class="sheet" role="dialog" aria-label="Mon compte">
     <h2>Mon compte <button class="x" onclick="closeSheet()" aria-label="Fermer">✕</button></h2>
