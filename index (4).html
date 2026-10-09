@@ -2,7 +2,7 @@
 <html lang="fr"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Cactus – jeu de cartes en ligne</title>
-<meta name="description" content="Cactus, le jeu de cartes de mémoire et de bluff. 2 à 8 joueurs, sur téléphone, tablette ou ordinateur. Gratuit, sans compte.">
+<meta name="description" content="Cactus, le jeu de cartes de mémoire et de bluff. 2 à 3 joueurs, sur téléphone, tablette ou ordinateur. Gratuit, sans compte.">
 <meta name="theme-color" content="#171a3a">
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Cactus">
@@ -13,122 +13,184 @@
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <style>
 :root{
-  --night:#171a3a;--dusk:#262b57;--dusk2:#323872;--sand:#f3e6c8;--sand2:#e6d4aa;
-  --cactus:#3f9d5a;--cactus-d:#2c7343;--flower:#ff5c8a;--sun:#ffc857;--ink:#1e2142;--mut:#a9aed6;--red:#d6285a;
-  --glass:rgba(255,255,255,.07);--line:rgba(255,255,255,.14);
+  --bg1:#323872;--bg2:#262b57;--bg3:#171a3a;--fg:#f3e6c8;--mut:#a9aed6;--panel:rgba(255,255,255,.07);--line:rgba(255,255,255,.14);
+  --field:rgba(10,12,35,.45);--sheet:#262b57;--phc:#8389bb;--acc:#ffc857;
+  --sand:#f3e6c8;--sand2:#e6d4aa;--cactus:#3f9d5a;--cactus-d:#2c7343;--flower:#ff5c8a;--sun:#ffc857;--ink:#1e2142;--red:#d6285a;
+  --felt-a:#2c7d49;--felt-b:#1d5c35;--felt-edge:#17462a;
+  --ow:30px;--oh:44px;--mw:54px;--mh:78px;--pw:60px;--pph:86px;
   box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
 }
+:root[data-theme="light"]{
+  --bg1:#fff8e6;--bg2:#f6ecd0;--bg3:#ead9ae;--fg:#1e2142;--mut:#5d6290;--panel:rgba(30,33,66,.06);--line:rgba(30,33,66,.18);
+  --field:#fff;--sheet:#fff8e6;--phc:#8a8fb5;--acc:#9a5b00;--red:#c81f4e;--felt-edge:#2a6a43;
+}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]):not([data-theme="light"]){
+  --bg1:#fff8e6;--bg2:#f6ecd0;--bg3:#ead9ae;--fg:#1e2142;--mut:#5d6290;--panel:rgba(30,33,66,.06);--line:rgba(30,33,66,.18);
+  --field:#fff;--sheet:#fff8e6;--phc:#8a8fb5;--acc:#9a5b00;--red:#c81f4e;--felt-edge:#2a6a43;
+}}
+:root[data-cards="big"]{--ow:36px;--oh:52px;--mw:62px;--mh:90px;--pw:68px;--pph:98px}
 html{scroll-padding-top:env(safe-area-inset-top,0px);height:100%}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{margin:0;min-height:100%;color:var(--sand);font-family:"Bricolage Grotesque",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:16px;line-height:1.45;
-  background:radial-gradient(120% 60% at 50% 0%,var(--dusk2) 0%,var(--dusk) 38%,var(--night) 100%) fixed;background-color:var(--night)}
-#app{max-width:620px;margin:0 auto;padding:0 14px 40px}
+body{margin:0;min-height:100%;color:var(--fg);font-family:"Bricolage Grotesque",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:16px;line-height:1.45;
+  background:radial-gradient(120% 60% at 50% 0%,var(--bg1) 0%,var(--bg2) 38%,var(--bg3) 100%) fixed;background-color:var(--bg3)}
+#app{max-width:620px;margin:0 auto;padding:0 12px 36px}
 h1,h2,h3{margin:0;font-weight:800;letter-spacing:-.02em;line-height:1.05}
 p{margin:0}
 :focus-visible{outline:3px solid var(--sun);outline-offset:2px}
 
-/* top bar */
-.top{display:flex;align-items:center;justify-content:space-between;padding:12px 0}
-.brand{font-weight:800;font-size:20px;letter-spacing:-.02em;display:flex;align-items:center;gap:8px}
-.link{background:none;border:1px solid var(--line);color:var(--sand);padding:8px 14px;border-radius:999px;font-size:14px;font-weight:600;margin:0}
-.link:hover{background:var(--glass)}
+/* barre du haut */
+.top{display:flex;align-items:center;justify-content:space-between;padding:8px 0;gap:8px}
+.brand{font-weight:800;font-size:18px;letter-spacing:-.02em}
+.tools{display:flex;gap:6px}
+.link{background:none;border:1px solid var(--line);color:var(--fg);padding:7px 12px;border-radius:999px;font-size:14px;font-weight:600;margin:0}
+.link:hover{background:var(--panel)}
 
-/* buttons / inputs */
+/* boutons / champs */
 button{font:inherit;border:0;border-radius:14px;padding:13px 18px;background:var(--flower);color:#fff;font-weight:700;margin:4px 6px 4px 0;cursor:pointer;transition:transform .08s,filter .15s}
 button:active{transform:scale(.97)}
 button:hover{filter:brightness(1.07)}
-button.s{background:var(--glass);color:var(--sand);border:1px solid var(--line)}
-button.on{background:var(--sun);color:var(--ink)}
-button.go{background:var(--sun);color:var(--ink)}
+button.s{background:var(--panel);color:var(--fg);border:1px solid var(--line)}
+button.on,button.go{background:var(--sun);color:var(--ink)}
 button.w{width:100%;margin-right:0}
+button.sm{padding:8px 12px;font-size:13px;margin:6px 0 0}
 button[disabled]{opacity:.4;cursor:not-allowed;filter:none}
-input{font:inherit;padding:14px 16px;border-radius:14px;border:2px solid var(--line);background:rgba(10,12,35,.45);color:var(--sand);width:100%;margin:4px 0}
-input::placeholder{color:#8389bb}
+input[type=text],input:not([type]){font:inherit;padding:14px 16px;border-radius:14px;border:2px solid var(--line);background:var(--field);color:var(--fg);width:100%;margin:4px 0}
+input::placeholder{color:var(--phc)}
 input:focus{outline:none;border-color:var(--sun)}
 #cd{text-transform:uppercase;letter-spacing:.35em;text-align:center;font-weight:800;font-size:22px}
 
-/* panels */
-.box{background:var(--glass);border:1px solid var(--line);border-radius:20px;padding:14px;margin:10px 0}
+/* panneaux */
+.box{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:14px;margin:10px 0}
 .mut{color:var(--mut);font-size:14px}
-.nm{font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .tag{font-size:12px;font-weight:700;padding:2px 9px;border-radius:99px;background:var(--sun);color:var(--ink)}
-.tag.ok{background:var(--cactus);color:#fff}
 
-/* home */
-.hero{text-align:center;padding:6px 0 4px}
-.hero svg{width:min(62vw,250px);height:auto;display:block;margin:0 auto}
-.hero h1{font-size:clamp(52px,16vw,84px);margin-top:-6px}
-.hero .sub{font-size:18px;color:var(--mut);max-width:30ch;margin:12px auto 0}
+/* avatars */
+.av{width:34px;height:34px;border-radius:50%;object-fit:cover;flex:none;display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;color:#fff;border:2px solid rgba(255,255,255,.65);background:var(--cactus)}
+.av.lg{width:68px;height:68px;font-size:28px}
+.avb{position:relative;background:none;border:0;padding:0;margin:0;flex:none;border-radius:50%}
+.avb i{position:absolute;right:-4px;bottom:-4px;font-style:normal;font-size:13px;background:var(--sun);color:var(--ink);width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+
+/* accueil */
+.hero{text-align:center;padding:4px 0}
+.hero svg{width:min(56vw,230px);height:auto;display:block;margin:0 auto}
+.hero h1{font-size:clamp(50px,15vw,80px);margin-top:-6px}
+.hero .sub{font-size:17px;color:var(--mut);max-width:30ch;margin:10px auto 0}
+.nrow{display:flex;align-items:center;gap:10px}
 .or{display:flex;align-items:center;gap:12px;color:var(--mut);font-size:14px;margin:6px 0}
 .or:before,.or:after{content:"";flex:1;height:1px;background:var(--line)}
-.err{color:var(--sun);font-size:14px;margin-top:6px;min-height:20px}
-.feat{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:18px 0 6px;text-align:center}
-.feat div{font-size:13px;color:var(--mut);background:var(--glass);border-radius:14px;padding:12px 6px;border:1px solid var(--line)}
-.feat b{display:block;font-size:22px;color:var(--sand);margin-bottom:2px}
-.foot{text-align:center;color:var(--mut);font-size:13px;margin-top:22px}
+.err{color:var(--acc);font-size:14px;margin-top:6px;min-height:20px}
+.feat{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:16px 0 6px;text-align:center}
+.feat div{font-size:13px;color:var(--mut);background:var(--panel);border-radius:14px;padding:12px 6px;border:1px solid var(--line)}
+.feat b{display:block;font-size:22px;color:var(--fg);margin-bottom:2px}
+.foot{text-align:center;color:var(--mut);font-size:13px;margin-top:20px}
 
-/* lobby */
+/* salon */
 .codeb{text-align:center}
-.code{font-size:clamp(46px,16vw,72px);font-weight:800;letter-spacing:.14em;margin:4px 0 8px;padding-left:.14em;color:var(--sun)}
-.pl{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
-.chip{background:rgba(255,255,255,.1);border-radius:99px;padding:8px 14px;font-weight:600}
+.code{font-size:clamp(44px,15vw,70px);font-weight:800;letter-spacing:.14em;margin:4px 0 8px;padding-left:.14em;color:var(--acc)}
+.pl{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.chip{display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:99px;padding:5px 14px 5px 5px;font-weight:600}
 
-/* cards */
+/* cartes */
 .c{width:44px;height:64px;border-radius:9px;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;user-select:none;cursor:pointer;position:relative;
   background:
     radial-gradient(circle at 50% 50%,rgba(255,255,255,.22) 0 5px,transparent 6px) 0 0/14px 14px,
     linear-gradient(145deg,var(--cactus),var(--cactus-d));
-  border:2px solid var(--sand);box-shadow:0 2px 0 rgba(0,0,0,.28);transition:transform .12s}
+  border:2px solid var(--sand);box-shadow:0 2px 0 rgba(0,0,0,.3);transition:transform .12s}
 .c:hover{transform:translateY(-2px)}
 .c.up{background:var(--sand);color:var(--ink);border-color:var(--sand2)}
 .c.rd{color:var(--red)}
-.row{display:flex;flex-wrap:wrap;gap:7px;align-items:center}
-.me .c{width:58px;height:84px;font-size:21px}
-.big{width:66px;height:94px;font-size:24px;cursor:default}
-.big:hover{transform:none}
 .sel{outline:3px solid var(--sun);outline-offset:2px;transform:translateY(-4px)}
 .fl{animation:fl 1.6s}
 @keyframes fl{0%,60%{outline:4px solid var(--sun);transform:scale(1.15)}100%{outline:0;transform:none}}
-.turn{border-color:var(--sun);box-shadow:0 0 0 2px var(--sun) inset}
-.ctr{display:flex;gap:22px;justify-content:center;align-items:flex-end;margin:16px 0;text-align:center;font-size:13px;color:var(--mut)}
-.ctr>div{display:flex;flex-direction:column;align-items:center;gap:6px}
-.log div{font-size:14px;padding:3px 0;color:var(--mut)}.log div:first-child{font-weight:700;color:var(--sand)}
-.hl{background:var(--sun);color:var(--ink);padding:11px 14px;border-radius:14px;margin:8px 0;font-weight:700}
-.hl.end{background:var(--flower);color:#fff;font-size:20px;text-align:center}
-.acts{margin:4px 0}
 
-/* rules modal */
-.ov{position:fixed;inset:0;background:rgba(8,10,28,.78);z-index:20;display:flex;align-items:flex-end;justify-content:center;animation:ovin .18s}
+/* TABLE DE JEU */
+.status{text-align:center;font-weight:700;font-size:14px;padding:8px 12px;border-radius:12px;color:var(--mut);background:var(--panel);margin:2px 0 8px}
+.status.hot{background:var(--sun);color:var(--ink)}
+.felt{background:radial-gradient(110% 90% at 50% 40%,var(--felt-a),var(--felt-b));border:4px solid var(--felt-edge);border-radius:34px;padding:10px 8px 12px;color:var(--sand);
+  box-shadow:inset 0 0 50px rgba(0,0,0,.28),0 8px 22px rgba(0,0,0,.28);position:relative}
+.seats{display:grid;gap:6px}
+.seats.n1{grid-template-columns:1fr}
+.seats.n2{grid-template-columns:1fr 1fr}
+.seat{display:flex;flex-direction:column;align-items:center;gap:6px;padding:6px 4px;border-radius:18px;border:2px solid transparent;min-width:0}
+.seat.turn{border-color:var(--sun);background:rgba(255,200,87,.14)}
+.seat.turn .av{border-color:var(--sun)}
+.who{display:flex;align-items:center;gap:7px;max-width:100%;min-width:0}
+.wn{min-width:0;line-height:1.15;text-align:left}
+.wn b{display:block;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wn small{display:block;font-size:11px;opacity:.85;white-space:nowrap}
+.cards{display:grid;grid-template-columns:repeat(3,max-content);gap:4px;justify-content:center}
+.opp .c{width:var(--ow);height:var(--oh);font-size:12px;border-radius:6px;border-width:1.5px;cursor:default}
+.opp .c:hover{transform:none}
+.seats.n1 .opp .cards{display:flex;flex-wrap:wrap;gap:6px}
+.seats.n1 .opp .c{width:calc(var(--ow)*1.3);height:calc(var(--oh)*1.3);font-size:14px}
+.opp.pick .c{cursor:pointer;box-shadow:0 0 0 2px var(--sun)}
+.opp.pick .c:hover{transform:translateY(-2px)}
+.center{display:flex;gap:18px;justify-content:center;align-items:flex-end;margin:10px 0 8px;position:relative}
+.dir{position:absolute;right:6px;top:-4px;font-size:12px;opacity:.8}
+.pile{display:flex;flex-direction:column;align-items:center;gap:5px;font-size:12px}
+.pile .c{width:var(--pw);height:var(--pph);font-size:24px;cursor:default}
+.pile .c:hover{transform:none}
+.pile.act{cursor:pointer}
+.pile.act .c{cursor:pointer;box-shadow:0 0 0 3px var(--sun),0 0 18px rgba(255,200,87,.6)}
+.pile.act .c:hover{transform:translateY(-3px)}
+.mine{margin-top:2px}
+.mine .cards{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.mine .c{width:var(--mw);height:var(--mh);font-size:20px}
+.bar{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:10px 0 4px}
+.bar button{padding:9px 14px;font-size:14px;margin:0;border-radius:12px}
+.lg{font-size:12.5px;color:var(--mut);line-height:1.4;padding:4px 6px;margin-top:6px}
+.lg div:first-child{color:var(--fg);font-weight:600}
+
+/* feuilles (règles / réglages) */
+.ov{position:fixed;inset:0;background:rgba(8,10,28,.7);z-index:20;display:flex;align-items:flex-end;justify-content:center;animation:ovin .18s}
 @keyframes ovin{from{opacity:0}to{opacity:1}}
-.sheet{background:var(--dusk);border:1px solid var(--line);border-radius:24px 24px 0 0;width:100%;max-width:620px;max-height:88vh;overflow:auto;padding:22px 20px calc(24px + env(safe-area-inset-bottom,0px))}
+.sheet{background:var(--sheet);color:var(--fg);border:1px solid var(--line);border-radius:24px 24px 0 0;width:100%;max-width:620px;max-height:88vh;overflow:auto;padding:20px 18px calc(22px + env(safe-area-inset-bottom,0px))}
 @media(min-width:700px){.ov{align-items:center}.sheet{border-radius:24px}}
-.sheet h2{font-size:30px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center}
-.sheet h3{font-size:17px;margin:18px 0 6px;color:var(--sun)}
-.sheet p,.sheet li{color:#e6e0c9}
+.sheet h2{font-size:28px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+.sheet h3{font-size:16px;margin:18px 0 8px;color:var(--acc)}
+.sheet p,.sheet li{color:var(--fg)}
 .sheet ul{margin:6px 0;padding-left:20px}.sheet li{margin:4px 0}
-.vals{display:grid;grid-template-columns:repeat(2,1fr);gap:6px 14px;margin:6px 0}
-.vals span{background:var(--glass);border-radius:10px;padding:6px 10px;font-size:14px}
-.vals b{color:var(--sun)}
-.x{background:var(--glass);border:1px solid var(--line);color:var(--sand);width:40px;height:40px;padding:0;border-radius:99px;margin:0;font-size:18px}
+.vals{display:grid;grid-template-columns:repeat(2,1fr);gap:6px 12px;margin:6px 0}
+.vals span{background:var(--panel);border-radius:10px;padding:6px 10px;font-size:14px}
+.vals b{color:var(--acc)}
+.x{background:var(--panel);border:1px solid var(--line);color:var(--fg);width:40px;height:40px;padding:0;border-radius:99px;margin:0;font-size:18px}
+.prof{display:flex;gap:14px;align-items:center}
+.prof>div{flex:1;min-width:0}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button{flex:1;margin:0;padding:10px 8px}
 
 .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--sand);color:var(--ink);padding:10px 18px;border-radius:99px;font-weight:700;z-index:30;box-shadow:0 8px 24px rgba(0,0,0,.4)}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style></head><body>
 <div id="app"></div>
+<div id="ov"></div>
 <script>
 const R=['A','2','3','4','5','6','7','8','9','10','V','D','R'],SU=['♠','♥','♦','♣'];
+const MAXP=3; /* nombre maximum de joueurs */
 const red=c=>c.s==='♥'||c.s==='♦';
 const val=c=>c.r==='JK'?0:c.r==='A'?1:c.r==='R'?(red(c)?0:10):(c.r==='V'||c.r==='D')?10:+c.r;
 const nm=c=>c.r==='JK'?'🃏':c.r+c.s;
 const esc=t=>String(t).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
 const sh=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
-let db,ref,S=null,uid,mi=-1,peeks={},looks=0,flashMode=false,sel=null,seenN=0,fresh=false,rev=null,revN=0,myName='',msg='',rules=false,pre='';
-const app=document.getElementById('app');
-try{myName=localStorage.getItem('cn')||''}catch(e){}
+let S=null,uid,mi=-1,peeks={},looks=0,flashMode=false,sel=null,seenN=0,fresh=false,rev=null,revN=0,myName='',myAv='',msg='',pre='',theme='auto',cardsz='n';
+const app=document.getElementById('app'),ovEl=document.getElementById('ov');
+try{myName=localStorage.getItem('cn')||'';myAv=localStorage.getItem('ca')||'';theme=localStorage.getItem('ct')||'auto';cardsz=localStorage.getItem('cs')||'n'}catch(e){}
 try{pre=(new URLSearchParams(location.search).get('c')||'').toUpperCase().replace(/[^A-Z]/g,'').slice(0,4)}catch(e){}
-
 try{uid=localStorage.getItem('cu')}catch(e){}
 if(!uid){uid='g'+Math.random().toString(36).slice(2,12);try{localStorage.setItem('cu',uid)}catch(e){}}
+const okAv=a=>(typeof a==='string'&&a.startsWith('data:image/jpeg;base64,')&&a.length<30000)?a:'';
+
+/* thème et taille des cartes */
+function applyTheme(){
+  const r=document.documentElement;
+  if(theme==='auto')r.removeAttribute('data-theme');else r.setAttribute('data-theme',theme);
+  r.setAttribute('data-cards',cardsz==='b'?'big':'normal');
+  try{const dark=theme==='dark'||(theme==='auto'&&window.matchMedia('(prefers-color-scheme: dark)').matches);
+    const m=document.querySelector('meta[name=theme-color]');if(m)m.content=dark?'#171a3a':'#f6ecd0'}catch(e){}
+}
+function setTheme(k){theme=k;try{localStorage.setItem('ct',k)}catch(e){}applyTheme();openSheet('set')}
+function setCards(k){cardsz=k;try{localStorage.setItem('cs',k)}catch(e){}applyTheme();openSheet('set')}
+applyTheme();
 
 /* manifest intégré (installation sur l'écran d'accueil) */
 try{
@@ -137,6 +199,7 @@ try{
   const l=document.createElement('link');l.rel='manifest';l.href=URL.createObjectURL(new Blob([JSON.stringify(m)],{type:'application/manifest+json'}));document.head.appendChild(l);
 }catch(e){}
 
+/* ---- logique du jeu ---- */
 function say(s,t,slots,r){s.ev={n:(s.ev?s.ev.n:0)+1,t,slots:slots||[],rev:r||null};s.log.unshift(t);s.log=s.log.slice(0,5)}
 const actives=s=>s.players.map((p,i)=>i).filter(i=>!s.players[i].out);
 function nextTurn(s){
@@ -157,18 +220,18 @@ function onState(){
   if(S.stage!=='valet')sel=null;
 }
 
-/* ---- actions ---- */
+/* ---- réseau et actions ---- */
 const RD={};let isHost=false,peer=null,hconn=null,conns={},code='';
 const L='ABCDEFGHJKMNPQRSTUVWXYZ';
-function send(op,a){a=a||[];if(isHost)handle(uid,op,a);else if(hconn&&hconn.open)hconn.send(JSON.stringify({id:uid,name:myName,op,a}))}
+function send(op,a){a=a||[];if(isHost)handle(uid,op,a,null,myName,myAv);else if(hconn&&hconn.open)hconn.send(JSON.stringify({id:uid,name:myName,av:myAv,op,a}))}
 function toConn(c,o){try{c.send(JSON.stringify(o))}catch(e){}}
 function broadcast(){const m=JSON.stringify({t:'s',s:S});for(const k in conns)try{conns[k].send(m)}catch(e){}onState();render()}
-function handle(pid,op,a,c,name){
+function handle(pid,op,a,c,name,av){
   if(op==='join'){
     if(!S.players.some(p=>p.id===pid)){
       if(S.phase!=='lobby'){if(c)toConn(c,{err:'La partie a déjà commencé'});return}
-      if(S.players.length>=8){if(c)toConn(c,{err:'Salle pleine (8 joueurs maximum)'});return}
-      S.players.push({id:pid,name:name||'Joueur',cards:[]});
+      if(S.players.length>=MAXP){if(c)toConn(c,{err:'Salle pleine ('+MAXP+' joueurs maximum)'});return}
+      S.players.push({id:pid,name:String(name||'Joueur').slice(0,14),av:okAv(av),cards:[]});
     }
   }else{
     const i=S.players.findIndex(p=>p.id===pid);
@@ -189,12 +252,12 @@ function openRoom(n){
   peer=new Peer('cactus-'+code);
   peer.on('open',()=>{
     msg='';
-    S={code,phase:'lobby',n:5,host:uid,players:[{id:uid,name:myName,cards:[]}],deck:[],disc:[],turn:0,stage:'',held:null,log:[],ev:null};
+    S={code,phase:'lobby',n:5,host:uid,players:[{id:uid,name:myName,av:okAv(myAv),cards:[]}],deck:[],disc:[],turn:0,stage:'',held:null,log:[],ev:null};
     onState();render();try{navigator.wakeLock&&navigator.wakeLock.request('screen')}catch(e){}
   });
   peer.on('connection',c=>{
     c.on('open',()=>{conns[c.peer]=c});
-    c.on('data',d=>{try{const o=JSON.parse(d);handle(o.id,o.op,o.a||[],c,o.name)}catch(e){}});
+    c.on('data',d=>{try{const o=JSON.parse(d);handle(o.id,o.op,o.a||[],c,o.name,o.av)}catch(e){}});
     c.on('close',()=>{delete conns[c.peer]});
   });
   peer.on('disconnected',()=>{try{peer.reconnect()}catch(e){}});
@@ -226,6 +289,7 @@ function connect(){
     if(!S)render();else setTimeout(connect,3000);
   });
 }
+RD.profile=(s,mi,n,a)=>{const p=s.players[mi];if(typeof n==='string'&&n.trim())p.name=n.trim().slice(0,14);p.av=okAv(a)};
 RD.setN=(s,mi,n)=>{s.n=n};
 const setN=(n)=>send('setN',[n]);
 RD.start=(s,mi)=>{
@@ -267,7 +331,7 @@ RD.seven=(s,mi,ci)=>{if(s.turn!==mi||s.stage!=='seven')return false;say(s,s.play
 const seven=(ci)=>send('seven',[ci]);
 RD.valet=(s,mi,ci,pj,cj)=>{
   if(s.turn!==mi||s.stage!=='valet')return false;
-  const a=s.players[mi],b=s.players[pj];if(!b.cards[cj]||!a.cards[ci])return false;
+  const a=s.players[mi],b=s.players[pj];if(!b||!b.cards[cj]||!a.cards[ci])return false;
   [a.cards[ci],b.cards[cj]]=[b.cards[cj],a.cards[ci]];
   say(s,'Valet : '+a.name+' échange sa carte n°'+(ci+1)+' avec la n°'+(cj+1)+' de '+b.name,[[mi,ci],[pj,cj]]);nextTurn(s);
 };
@@ -289,9 +353,37 @@ RD.flash=(s,mi,ci)=>{
 };
 const flash=(ci)=>send('flash',[ci]);
 
-/* ---- UI ---- */
+/* ---- profil ---- */
+function avHtml(n,a,cls){
+  cls=cls||'av';
+  if(a)return `<img class="${cls}" src="${esc(a)}" alt="">`;
+  let h=0;for(const ch of String(n||'?'))h=(h*31+ch.charCodeAt(0))%360;
+  return `<span class="${cls}" style="background:hsl(${h} 50% 42%)">${esc((String(n||'?').trim().charAt(0)||'?').toUpperCase())}</span>`;
+}
+function pushProfile(){if(S&&mi>=0)send('profile',[myName,myAv])}
+function saveName(v){
+  v=String(v).trim().slice(0,14);if(!v)return;
+  myName=v;try{localStorage.setItem('cn',v)}catch(e){}
+  pushProfile();if(!S)render();
+}
+function pickPhoto(inp){
+  const f=inp.files&&inp.files[0];if(!f)return;
+  const img=new Image(),url=URL.createObjectURL(f);
+  img.onload=()=>{
+    const z=72,cv=document.createElement('canvas');cv.width=cv.height=z;
+    const side=Math.min(img.width,img.height),sx=(img.width-side)/2,sy=(img.height-side)/2;
+    cv.getContext('2d').drawImage(img,sx,sy,side,side,0,0,z,z);
+    myAv=cv.toDataURL('image/jpeg',.7);URL.revokeObjectURL(url);
+    try{localStorage.setItem('ca',myAv)}catch(e){}
+    pushProfile();openSheet('set');if(!S)render();
+  };
+  img.onerror=()=>{URL.revokeObjectURL(url);toast('Image illisible')};
+  img.src=url;
+}
+function delPhoto(){myAv='';try{localStorage.removeItem('ca')}catch(e){}pushProfile();openSheet('set');if(!S)render()}
+
+/* ---- interface ---- */
 function toast(t){const e=document.createElement('div');e.className='toast';e.textContent=t;document.body.appendChild(e);setTimeout(()=>e.remove(),2200)}
-function toggleRules(){rules=!rules;render()}
 function shareLink(){
   const u=location.origin+location.pathname+'?c='+S.code;
   if(navigator.share){navigator.share({title:'Cactus',text:'Rejoins ma partie de Cactus 🌵 Code : '+S.code,url:u}).catch(()=>{})}
@@ -301,7 +393,7 @@ function shareLink(){
 function peek(ci){const k=mi+'-'+ci;peeks[k]=1;render();setTimeout(()=>{delete peeks[k];render()},3500)}
 function cd(pi,ci){
   const p=S.players[pi],c=p.cards[ci];
-  const up=p.out||peeks[pi+'-'+ci]||(rev&&rev.pi===pi&&(rev.cis==='all'||rev.cis.includes(ci)));
+  const up=p.out||S.phase==='end'||peeks[pi+'-'+ci]||(rev&&rev.pi===pi&&(rev.cis==='all'||rev.cis.includes(ci)));
   const f=fresh&&S.ev&&S.ev.slots.some(x=>x[0]===pi&&x[1]===ci);
   return `<div class="c${up?' up':''}${up&&red(c)?' rd':''}${f?' fl':''}${pi===mi&&sel===ci&&S.stage==='valet'?' sel':''}" data-p="${pi}" data-i="${ci}">${up?nm(c):''}</div>`;
 }
@@ -321,15 +413,16 @@ const CACTUS_SVG=`<svg viewBox="0 0 260 250" role="img" aria-label="Un cactus en
 <g transform="translate(130 62)"><g fill="#ff5c8a"><ellipse cx="0" cy="-13" rx="8" ry="12"/><ellipse cx="12" cy="-4" rx="8" ry="12" transform="rotate(72 12 -4)"/><ellipse cx="7" cy="11" rx="8" ry="12" transform="rotate(144 7 11)"/><ellipse cx="-7" cy="11" rx="8" ry="12" transform="rotate(216 -7 11)"/><ellipse cx="-12" cy="-4" rx="8" ry="12" transform="rotate(288 -12 -4)"/></g><circle r="6" fill="#ffc857"/></g>
 </svg>`;
 
-const RULES=`<div class="ov" onclick="if(event.target===this)toggleRules()"><div class="sheet" role="dialog" aria-label="Règles du jeu">
-<h2>Règles du jeu <button class="x" onclick="toggleRules()" aria-label="Fermer">✕</button></h2>
-<p>Garde le moins de points possible, et sois le premier à réussir un Cactus. Le dernier joueur qui n’a pas réussi son Cactus perd la partie.</p>
+const RULES=`<div class="ov" onclick="if(event.target===this)closeSheet()"><div class="sheet" role="dialog" aria-label="Règles du jeu">
+<h2>Règles du jeu <button class="x" onclick="closeSheet()" aria-label="Fermer">✕</button></h2>
+<p>De 2 à 3 joueurs. Garde le moins de points possible, et sois le premier à réussir un Cactus. Le dernier joueur qui n’a pas réussi son Cactus perd la partie.</p>
 <h3>Mise en place</h3>
 <p>Chacun reçoit 4 à 6 cartes face cachée (choix de l’hôte). Tu regardes 2 de tes cartes, tu les mémorises, puis elles se retournent.</p>
 <h3>À ton tour</h3>
-<ul><li>Pioche une carte, ou prends celle du dessus de la défausse.</li>
+<ul><li>Touche la pioche, ou la défausse pour prendre sa carte.</li>
 <li>Échange-la avec une de tes cartes. La carte remplacée part dans la défausse.</li>
-<li>Ou annonce <b>Cactus</b> au début de ton tour, à la place de piocher.</li></ul>
+<li>Ou annonce <b>Cactus</b> au début de ton tour, à la place de piocher.</li>
+<li>Le jeu tourne dans le sens des aiguilles d’une montre (↻).</li></ul>
 <h3>Pouvoirs des cartes défaussées</h3>
 <ul><li><b>7</b> : regarde une de tes cartes.</li>
 <li><b>Valet</b> : échange une de tes cartes avec une carte d’un adversaire, sans la voir.</li>
@@ -342,62 +435,88 @@ const RULES=`<div class="ov" onclick="if(event.target===this)toggleRules()"><div
 <div class="vals"><span><b>As</b> : 1</span><span><b>2 à 10</b> : leur valeur</span><span><b>Valet, Dame</b> : 10</span><span><b>Roi noir</b> : 10</span><span><b>Roi rouge</b> : 0</span><span><b>Joker</b> : 0</span></div>
 </div></div>`;
 
-function head(){return `<div class="top"><div class="brand">🌵 Cactus</div><button class="link" onclick="toggleRules()">Règles</button></div>`}
+function setHtml(){
+  const seg=(cur,list,fn)=>list.map(([k,l])=>`<button class="${cur===k?'on':'s'}" onclick="${fn}('${k}')">${l}</button>`).join('');
+  return `<div class="ov" onclick="if(event.target===this)closeSheet()"><div class="sheet" role="dialog" aria-label="Réglages">
+  <h2>Réglages <button class="x" onclick="closeSheet()" aria-label="Fermer">✕</button></h2>
+  <h3>Mon profil</h3>
+  <div class="prof"><button class="avb" onclick="document.getElementById('pf').click()" aria-label="Changer la photo">${avHtml(myName,myAv,'av lg')}<i>📷</i></button>
+  <div><input id="pn" maxlength="14" placeholder="Ton prénom" value="${esc(myName)}" onchange="saveName(this.value)">
+  <input type="file" id="pf" accept="image/*" hidden onchange="pickPhoto(this)">
+  ${myAv?'<button class="s sm" onclick="delPhoto()">Retirer la photo</button>':'<span class="mut">Touche l’image pour ajouter une photo.</span>'}</div></div>
+  <h3>Apparence</h3>
+  <div class="seg">${seg(theme,[['auto','Auto'],['light','Clair'],['dark','Sombre']],'setTheme')}</div>
+  <h3>Taille des cartes</h3>
+  <div class="seg">${seg(cardsz,[['n','Normales'],['b','Grandes']],'setCards')}</div>
+  <button class="go w" style="margin-top:20px" onclick="closeSheet()">Terminé</button>
+  </div></div>`;
+}
+function openSheet(k){ovEl.innerHTML=k==='rules'?RULES:setHtml()}
+function closeSheet(){ovEl.innerHTML=''}
+
+function head(){return `<div class="top"><div class="brand">🌵 Cactus</div><div class="tools"><button class="link" onclick="openSheet('rules')">Règles</button><button class="link" onclick="openSheet('set')">⚙️ Réglages</button></div></div>`}
 
 function render(){
   fresh=!!(S&&S.ev&&S.ev.n!==seenN);
   if(!S){
-    const n0=document.getElementById('nm'),c0=document.getElementById('cd');
-    if(n0)myName=n0.value;if(c0)pre=c0.value;
     app.innerHTML=head()+`<div class="hero">${CACTUS_SVG}<h1>Cactus</h1><p class="sub">Le jeu de cartes où la mémoire et le bluff font la différence.</p></div>
-    <div class="box"><input id="nm" placeholder="Ton prénom" maxlength="14" autocomplete="nickname" value="${esc(myName)}">
+    <div class="box"><div class="nrow"><button class="avb" onclick="openSheet('set')" aria-label="Mon profil">${avHtml(myName,myAv,'av lg')}<i>📷</i></button>
+    <input id="nm" placeholder="Ton prénom" maxlength="14" autocomplete="nickname" value="${esc(myName)}" oninput="myName=this.value"></div>
     <button class="go w" onclick="create()">Créer une partie</button>
     <div class="or">ou</div>
-    <input id="cd" placeholder="CODE" maxlength="4" autocapitalize="characters" autocomplete="off" value="${esc(pre)}">
+    <input id="cd" placeholder="CODE" maxlength="4" autocapitalize="characters" autocomplete="off" value="${esc(pre)}" oninput="pre=this.value">
     <button class="w" onclick="join()">Rejoindre une partie</button>
     <div class="err" role="status">${esc(msg)}</div></div>
-    <div class="feat"><div><b>2 à 8</b>joueurs</div><div><b>0 €</b>sans compte</div><div><b>Tout</b>appareil</div></div>
-    <p class="foot">Ouvre ce lien sur iPhone, Android, Mac ou PC et jouez ensemble.</p>`+(rules?RULES:'');return;
+    <div class="feat"><div><b>2 à 3</b>joueurs</div><div><b>0 €</b>sans compte</div><div><b>Tout</b>appareil</div></div>
+    <p class="foot">Ouvre ce lien sur iPhone, Android, Mac ou PC et jouez ensemble.</p>`;return;
   }
-  if(mi<0){app.innerHTML=head()+'<div class="box">Tu n’es pas dans cette partie. <button class="w" onclick="location.reload()">Retour à l’accueil</button></div>'+(rules?RULES:'');return}
+  if(mi<0){app.innerHTML=head()+'<div class="box">Tu n’es pas dans cette partie. <button class="w" onclick="location.reload()">Retour à l’accueil</button></div>';return}
   const host=S.host===uid;
   if(S.phase==='lobby'){
     app.innerHTML=head()+`<div class="box codeb"><div class="mut">Code de la partie</div><div class="code">${S.code}</div>
     <button class="go" onclick="shareLink()">Inviter des joueurs</button></div>
-    <div class="box"><b>Joueurs (${S.players.length}/8)</b><div class="pl">${S.players.map(p=>`<span class="chip">${esc(p.name)}${p.id===S.host?' 👑':''}${p.id===uid?' (toi)':''}</span>`).join('')}</div></div>
+    <div class="box"><b>Joueurs (${S.players.length}/${MAXP})</b><div class="pl">${S.players.map(p=>`<span class="chip">${avHtml(p.name,p.av)}${esc(p.name)}${p.id===S.host?' 👑':''}${p.id===uid?' (toi)':''}</span>`).join('')}</div></div>
     ${host?`<div class="box"><b>Cartes par joueur</b><div style="margin-top:6px">${[4,5,6].map(n=>`<button class="${S.n===n?'on':'s'}" onclick="setN(${n})">${n}</button>`).join('')}</div>
     <button class="go w" style="margin-top:10px" onclick="start()" ${S.players.length<2?'disabled':''}>${S.players.length<2?'Il faut au moins 2 joueurs':'Lancer la partie'}</button>
-    <p class="mut" style="margin-top:8px">Garde cette page ouverte : la partie tourne sur ton appareil.</p></div>`:`<div class="box"><p class="mut">En attente du lancement par l’hôte… (${S.n} cartes par joueur)</p></div>`}`+(rules?RULES:'');return;
+    <p class="mut" style="margin-top:8px">Garde cette page ouverte : la partie tourne sur ton appareil.</p></div>`:`<div class="box"><p class="mut">En attente du lancement par l’hôte… (${S.n} cartes par joueur)</p></div>`}`;return;
   }
   const me=S.players[mi],myTurn=S.phase==='play'&&S.turn===mi&&!me.out,st=S.stage;
-  const top=S.disc[S.disc.length-1];
-  let h=head();
-  S.players.forEach((p,i)=>{if(i===mi)return;
-    h+=`<div class="box${S.phase==='play'&&S.turn===i?' turn':''}"><div class="nm">${esc(p.name)}${p.out?' <span class="tag ok">Cactus réussi</span>':''}${S.phase==='play'&&S.turn===i?' <span class="tag">joue</span>':''}${S.phase==='look'&&p.ready?' <span class="tag ok">prêt</span>':''}</div><div class="row">${p.cards.map((_,c)=>cd(i,c)).join('')}</div></div>`});
-  const held=S.held&&st==='hold'?(S.turn===mi||S.heldPub?`<div><div class="c up big${red(S.held)?' rd':''}">${nm(S.held)}</div>en main</div>`:`<div><div class="c big"></div>en main</div>`):'';
-  h+=`<div class="ctr"><div><div class="c big">${S.deck.length}</div>pioche</div>
-  <div><div class="c up big${top&&red(top)?' rd':''}${fresh?' fl':''}">${top?nm(top):'–'}</div>défausse</div>${held}</div>`;
-  if(S.ev)h+=`<div class="hl">${esc(S.ev.t)}</div>`;
-  if(S.phase==='end')h+=`<div class="hl end">🌵 Perdant : ${esc(S.players[S.loser].name)}</div>${host?'<button class="go w" onclick="again()">Rejouer</button>':'<p class="mut">L’hôte peut relancer une partie.</p>'}`;
-  if(S.phase==='look'){
-    h+=me.ready?'<p class="mut">En attente des autres joueurs…</p>':`<p>Touche 2 de tes cartes pour les mémoriser (${looks}/2)</p><button class="go" onclick="ready()" ${looks<2?'disabled':''}>Je suis prêt</button>`;
-  }
-  if(S.phase==='play'){
-    const t=S.players[S.turn];
-    if(myTurn){
-      h+=st==='draw'?`<div class="hl">À toi de jouer : pioche ou annonce Cactus</div><div class="acts"><button onclick="drawFrom('deck')">Piocher</button><button onclick="drawFrom('disc')" ${top?'':'disabled'}>Prendre la défausse</button><button class="s" onclick="if(confirm('Annoncer Cactus ? Si tu te trompes, tu prends une carte.'))cactus()">🌵 Cactus</button></div>`:
-      st==='hold'?'<div class="hl">Touche une de tes cartes pour l’échanger avec la carte en main</div>':
-      st==='seven'?'<div class="hl">7 : touche une de tes cartes pour la regarder</div><button class="s" onclick="pass()">Passer</button>':
-      '<div class="hl">Valet : choisis une de tes cartes, puis une carte adverse</div><button class="s" onclick="pass()">Passer</button>';
-    }else if(!me.out)h+=`<p class="mut">Tour de ${esc(t.name)}…</p>`;
-    if(!me.out)h+=`<button class="${flashMode?'on':'s'}" onclick="flashMode=!flashMode;render()">⚡ ${flashMode?'Touche la carte à poser':'Poser une carte (même rang)'}</button>`;
-  }
-  h+=`<div class="box me${myTurn?' turn':''}"><div class="nm">${esc(me.name)} (toi)${me.out?' <span class="tag ok">Cactus réussi</span>':''}</div><div class="row">${me.cards.map((_,c)=>cd(mi,c)).join('')}</div></div>`;
-  h+=`<div class="box log">${S.log.map(l=>`<div>${esc(l)}</div>`).join('')}</div>`;
-  app.innerHTML=h+(rules?RULES:'');
+  const top=S.disc[S.disc.length-1],canDraw=myTurn&&st==='draw',ended=S.phase==='end',pick=myTurn&&st==='valet';
+  let status='',hot=false;
+  if(S.phase==='look'){status=me.ready?'En attente des autres joueurs…':`Touche 2 de tes cartes pour les mémoriser (${looks}/2)`;hot=!me.ready}
+  else if(S.phase==='play'){
+    if(myTurn){hot=true;status=st==='draw'?'À toi ! Touche la pioche ou la défausse':st==='hold'?'Touche une de tes cartes pour l’échanger':st==='seven'?'7 : touche une de tes cartes pour la regarder':'Valet : une de tes cartes, puis une carte adverse'}
+    else if(!me.out)status='Tour de '+S.players[S.turn].name+'…';
+    else status='Tu as réussi ton Cactus 🏆';
+  }else if(ended){hot=true;status='🌵 Perdant : '+S.players[S.loser].name}
+  const pts=p=>p.cards.reduce((t,c)=>t+val(c),0);
+  const seat=(i,cls)=>{
+    const p=S.players[i],t=S.phase==='play'&&S.turn===i&&!p.out;
+    const sub=ended?pts(p)+' pts':p.out?'Cactus réussi 🏆':t?(i===mi?'à toi de jouer':'joue…'):p.cards.length+' cartes';
+    return `<div class="seat ${cls}${t?' turn':''}${pick&&i!==mi&&!p.out?' pick':''}"><div class="who">${avHtml(p.name,p.av)}<div class="wn"><b>${esc(p.name)}${i===mi?' (toi)':''}${S.phase==='look'&&p.ready?' ✓':''}</b><small>${esc(sub)}</small></div></div><div class="cards">${p.cards.map((_,c)=>cd(i,c)).join('')}</div></div>`;
+  };
+  const others=[];for(let k=1;k<S.players.length;k++)others.push((mi+k)%S.players.length);
+  const held=S.held&&st==='hold'?(S.turn===mi||S.heldPub?`<div class="pile"><div class="c up big${red(S.held)?' rd':''}">${nm(S.held)}</div><span>en main</span></div>`:`<div class="pile"><div class="c"></div><span>en main</span></div>`):'';
+  let h=head()+`<div class="status${hot?' hot':''}" role="status">${esc(status)}</div>`;
+  h+=`<div class="felt"><div class="seats n${others.length}">${others.map(i=>seat(i,'opp')).join('')}</div>
+  <div class="center"><span class="dir" title="Sens du jeu">↻</span>
+    <div class="pile${canDraw?' act':''}" data-pile="deck"><div class="c"></div><span>pioche · ${S.deck.length}</span></div>
+    <div class="pile${canDraw&&top?' act':''}" data-pile="${top?'disc':''}"><div class="c up${top&&red(top)?' rd':''}${fresh?' fl':''}">${top?nm(top):'–'}</div><span>défausse</span></div>${held}</div>
+  ${seat(mi,'mine')}</div>`;
+  let bar='';
+  if(S.phase==='look'&&!me.ready)bar+=`<button class="go" onclick="ready()" ${looks<2?'disabled':''}>Je suis prêt</button>`;
+  if(myTurn&&(st==='seven'||st==='valet'))bar+=`<button class="s" onclick="pass()">Passer</button>`;
+  if(canDraw)bar+=`<button class="s" onclick="if(confirm('Annoncer Cactus ? Si tu te trompes, tu prends une carte.'))cactus()">🌵 Cactus</button>`;
+  if(S.phase==='play'&&!me.out)bar+=`<button class="${flashMode?'on':'s'}" onclick="flashMode=!flashMode;render()">⚡ ${flashMode?'Touche la carte à poser':'Poser une carte'}</button>`;
+  if(ended)bar+=host?'<button class="go" onclick="again()">Rejouer</button>':'<span class="mut">L’hôte peut relancer une partie.</span>';
+  if(bar)h+=`<div class="bar">${bar}</div>`;
+  h+=`<div class="lg">${S.log.slice(0,3).map(l=>`<div>${esc(l)}</div>`).join('')}</div>`;
+  app.innerHTML=h;
   if(S.ev)seenN=S.ev.n;
 }
 app.addEventListener('click',e=>{
+  const pile=e.target.closest('[data-pile]');
+  if(pile&&S&&pile.dataset.pile&&S.phase==='play'&&S.turn===mi&&S.stage==='draw'&&!S.players[mi].out){drawFrom(pile.dataset.pile);return}
   const el=e.target.closest('.c[data-p]');if(!el||!S)return;
   const pi=+el.dataset.p,ci=+el.dataset.i,me=S.players[mi],mine=pi===mi;
   if(S.phase==='look'){if(mine&&!me.ready&&looks<2&&!peeks[pi+'-'+ci]){looks++;peek(ci)}return}
@@ -410,3 +529,4 @@ app.addEventListener('click',e=>{
 });
 render();
 </script></body></html>
+
