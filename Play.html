@@ -559,8 +559,10 @@ async function busy(btn,f){
 async function doGoogle(btn){aerr('');await busy(btn,async()=>{try{await window.CC.google()}catch(e){aerr(AERR[e.code]||'Erreur : '+(e.code||e.message))}})}
 async function doEmail(create,btn){
   const em=((document.getElementById('em')||{}).value||'').trim().toLowerCase(),pw=(document.getElementById('pw')||{}).value||'';
+  const un=((document.getElementById('un')||{}).value||'').trim().slice(0,14);
   aerr('');
-  await busy(btn,async()=>{try{create?await window.CC.signup(em,pw,myName):await window.CC.login(em,pw)}catch(e){aerr(AERR[e.code]||'Erreur : '+(e.code||e.message))}});
+  if(create&&!un){aerr('Choisis un pseudo pour créer ton compte');return}
+  await busy(btn,async()=>{try{create?await window.CC.signup(em,pw,un):await window.CC.login(em,pw)}catch(e){aerr(AERR[e.code]||'Erreur : '+(e.code||e.message))}});
 }
 async function doVerified(btn){
   aerr('');
@@ -582,18 +584,29 @@ function fetchPhoto(url){
   im.src=url;
 }
 function refreshUi(){if(!S)render();if(sheetKind==='acc'||sheetKind==='market')openSheet(sheetKind)}
+let wasIn=false;
 window.onAuth=async function(){
   const C=window.CC;
+  const save=()=>{try{localStorage.setItem('cn',myName);myAv?localStorage.setItem('ca',myAv):localStorage.removeItem('ca')}catch(e){}};
   if(C&&C.user&&C.user.emailVerified){
+    wasIn=true;
     try{
-      const d=await C.ensure(myName||C.user.displayName||'Joueur',myAv);
-      if(d){C.me=d;
-        if(!myName&&d.name){myName=d.name;try{localStorage.setItem('cn',myName)}catch(e){}}
-        if(!myAv&&okAv(d.photo)){myAv=d.photo;try{localStorage.setItem('ca',myAv)}catch(e){}}}
-      if(!myName&&C.user.displayName){myName=C.user.displayName.slice(0,14)}
-      if(!myAv&&C.user.photoURL)fetchPhoto(C.user.photoURL);
+      let first=true;try{first=!localStorage.getItem('cl')}catch(e){}
+      const dn=(C.user.displayName||(C.user.email||'').split('@')[0]||'Joueur').slice(0,14);
+      /* un nouveau compte reprend le profil invité seulement s'il n'y a jamais eu de compte sur cet appareil */
+      const d=await C.ensure(first&&myName?myName:dn,first?myAv:'');
+      C.me=d;
+      myName=d.name||dn;myAv=okAv(d.photo)?d.photo:'';
+      save();try{localStorage.setItem('cl','1')}catch(e){}
+      if(d._new&&!myAv&&C.user.photoURL)fetchPhoto(C.user.photoURL);
       if(S&&mi>=0)send('profile',[myName,myAv,curCos()]);
     }catch(e){console.error(e)}
+  }else if(C&&C.user){
+    /* compte pas encore vérifié : on n'affiche surtout pas le profil du compte précédent */
+    myName=(C.user.displayName||'').slice(0,14);myAv='';save();
+  }else if(wasIn){
+    /* déconnexion : le pseudo et la photo restent attachés au compte */
+    wasIn=false;myName='';myAv='';save();
   }
   applyTheme();refreshUi();
 };
@@ -803,6 +816,7 @@ function accHtml(){
   return H('Connexion')+`<p>Connecte-toi pour gagner des <b>cactus 🌵</b> et des <b>Cactus Coins</b>, et apparaître au classement mondial.</p>
   <button class="gbtn w" style="margin-top:14px" onclick="doGoogle(this)"><svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>Continuer avec Google</button>
   <div class="or">ou avec un e-mail</div>
+  <input id="un" maxlength="14" placeholder="Pseudo (pour créer un compte)" autocomplete="nickname">
   <input id="em" type="email" placeholder="E-mail" autocomplete="email">
   <input id="pw" type="password" placeholder="Mot de passe (6 caractères min.)" autocomplete="current-password">
   <div class="err" id="aerr" role="status"></div>
@@ -984,7 +998,7 @@ if(cfg){
           if(d.coins==null){const up={coins:50,owned:{},eq:{}};await Fs.updateDoc(r,up);return {...d,...up}}
           return {owned:{},eq:{},...d}}
         const d={name:String(name||'Joueur').slice(0,14),photo:photo||'',pts:0,games:0,wins:0,coins:50,owned:{},eq:{},t:Fs.serverTimestamp()};
-        await Fs.setDoc(r,d);return {...d}
+        await Fs.setDoc(r,d);return {...d,_new:true}
       },
       saveProfile:async(name,photo)=>{if(!auth.currentUser||!CC.me)return;await Fs.updateDoc(ref(),{name:String(name||'Joueur').slice(0,14),photo:photo||''})},
       addPoints:async(g,win,k)=>{
