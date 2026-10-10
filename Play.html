@@ -257,19 +257,12 @@ button.go.busy{--sp:var(--ink)}button.s.busy{--sp:var(--fg)}button.gbtn.busy{--s
 .shopi small{color:var(--mut);font-size:12px;min-height:16px;padding:0 2px}
 .shopi button{margin:2px 0 0;padding:9px 8px;font-size:13px;display:flex;align-items:center;justify-content:center;gap:5px}
 .rb{position:absolute;top:13px;left:13px;z-index:2;font-size:10px;font-weight:800;padding:2px 7px;border-radius:99px;background:rgba(0,0,0,.6);color:#fff}
-.mt{position:relative;width:100%;aspect-ratio:16/10;border-radius:14px;border:3px solid var(--felt-edge);overflow:hidden;
-  background-image:var(--felt-pat,none),radial-gradient(110% 90% at 50% 40%,var(--felt-a),var(--felt-b));background-size:var(--felt-size,auto),auto;
-  display:flex;flex-direction:column;justify-content:space-between;align-items:center;padding:6px 6px 7px;color:#f3e6c8}
-.mt .ms{display:flex;align-items:center;gap:5px;position:relative;max-width:100%}
-.mt .ms .pn{font-weight:700;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.mt .ms .pn[data-font=pixel]{font-size:8px}
-.mt .av{width:20px;height:20px;font-size:10px;border-width:1.5px}
-.mt .c{width:20px;height:28px;border-radius:4px;border-width:1.5px;font-size:9px;cursor:default;box-shadow:none}
-.mt .c:hover{transform:none}
-.mt .mid{display:flex;gap:8px}
-.mt .row3{display:flex;gap:4px}
-.mt .emo{position:absolute;left:auto;right:-30px;top:-8px;font-size:18px;animation:none}
-
+.mtw{position:relative;width:100%;overflow:hidden;border-radius:14px;pointer-events:none}
+.mtin{width:360px;transform-origin:0 0}
+.mtw .felt{margin:0}
+.mtw .emo{animation:none;opacity:1}
+.dvb{background:#b04bff;color:#fff;margin-left:6px;vertical-align:middle;font-size:11px}
+.devb{background:rgba(176,75,255,.18);border:1px solid #b04bff;border-radius:12px;padding:8px 10px;font-size:13px;margin-bottom:10px}
 .fly{position:fixed;z-index:40;pointer-events:none}
 .fly .c{width:100%;height:100%;cursor:default;transition:none;box-shadow:0 8px 20px rgba(0,0,0,.45)}
 .fly .c:hover{transform:none}
@@ -300,23 +293,23 @@ const BASE=[2,1,0.5,0.25,0.1]; /* cactus (points de classement) pour une partie 
 const gainFor=(r,n)=>Math.round(BASE[r]*(n-1)/4*100)/100; /* proportionnel au nombre d'adversaires */
 const fmt=n=>(Math.round(n*100)/100).toString().replace('.',',');
 const ord=r=>r===0?'1er':(r+1)+'e';
-const COIN_RATE=10; /* Cactus Coins gagnés = cactus de la partie × COIN_RATE */
+const COIN_RATE=5; /* Cactus Coins gagnés = cactus de la partie × COIN_RATE, arrondi à l'entier le plus proche */
 const coinsFor=g=>Math.round(g*COIN_RATE);
 const SHOP=[
- {cat:'felt',id:'green',name:'Vert classique',price:0},{cat:'felt',id:'wine',name:'Bordeaux',price:80},{cat:'felt',id:'ocean',name:'Océan',price:80},{cat:'felt',id:'violet',name:'Violet',price:100},{cat:'felt',id:'black',name:'Noir',price:120},
- {cat:'felt',id:'stripes',name:'Rayures',price:120},{cat:'felt',id:'dots',name:'Pois',price:140},{cat:'felt',id:'checker',name:'Damier',price:160},{cat:'felt',id:'diag',name:'Diagonales',price:160},{cat:'felt',id:'waves',name:'Ondes',price:180},{cat:'felt',id:'stars',name:'Ciel étoilé',price:220},
- {cat:'back',id:'classic',name:'Classique',price:0},{cat:'back',id:'dune',name:'Dune',price:60},{cat:'back',id:'night',name:'Nuit étoilée',price:80},{cat:'back',id:'rose',name:'Fleur rose',price:100},{cat:'back',id:'gold',name:'Doré',price:250},
- {cat:'frame',id:'none',name:'Sans cadre',price:0},{cat:'frame',id:'gold',name:'Or',price:120},{cat:'frame',id:'flower',name:'Fleur',price:120},{cat:'frame',id:'neon',name:'Néon',price:150},
- {cat:'font',id:'classic',name:'Classique',price:0},{cat:'font',id:'caveat',name:'Manuscrit',price:60},{cat:'font',id:'lobster',name:'Lobster',price:70},{cat:'font',id:'pacifico',name:'Pacifico',price:80},{cat:'font',id:'marker',name:'Marqueur',price:90},{cat:'font',id:'bangers',name:'BD',price:100},{cat:'font',id:'orbitron',name:'Futur',price:110},{cat:'font',id:'pixel',name:'Pixel',price:130},{cat:'font',id:'creepster',name:'Horreur',price:150},
- {cat:'emote',id:'thumb',name:'Pouce',ico:'👍',price:0},{cat:'emote',id:'laugh',name:'Mort de rire',ico:'😂',price:30},{cat:'emote',id:'cool',name:'Cool',ico:'😎',price:40},{cat:'emote',id:'rage',name:'Furieux',ico:'🤬',price:40},{cat:'emote',id:'cry',name:'Larmes',ico:'😭',price:40},{cat:'emote',id:'fire',name:'Feu',ico:'🔥',price:50},{cat:'emote',id:'party',name:'Fête',ico:'🎉',price:50},{cat:'emote',id:'finger',name:'Doigt',ico:'🖕',price:60}];
+ {cat:'felt',id:'green',name:'Vert classique',price:0},{cat:'felt',id:'wine',name:'Bordeaux',price:8},{cat:'felt',id:'ocean',name:'Océan',price:8},{cat:'felt',id:'violet',name:'Violet',price:10},{cat:'felt',id:'black',name:'Noir',price:12},
+ {cat:'felt',id:'stripes',name:'Rayures',price:15},{cat:'felt',id:'dots',name:'Pois',price:18},{cat:'felt',id:'checker',name:'Damier',price:20},{cat:'felt',id:'diag',name:'Diagonales',price:20},{cat:'felt',id:'waves',name:'Ondes',price:25},{cat:'felt',id:'stars',name:'Ciel étoilé',price:30},
+ {cat:'back',id:'classic',name:'Classique',price:0},{cat:'back',id:'dune',name:'Dune',price:8},{cat:'back',id:'night',name:'Nuit étoilée',price:12},{cat:'back',id:'rose',name:'Fleur rose',price:15},{cat:'back',id:'gold',name:'Doré',price:35},
+ {cat:'frame',id:'none',name:'Sans cadre',price:0},{cat:'frame',id:'gold',name:'Or',price:15},{cat:'frame',id:'flower',name:'Fleur',price:15},{cat:'frame',id:'neon',name:'Néon',price:20},
+ {cat:'font',id:'classic',name:'Classique',price:0},{cat:'font',id:'caveat',name:'Manuscrit',price:6},{cat:'font',id:'lobster',name:'Lobster',price:8},{cat:'font',id:'pacifico',name:'Pacifico',price:8},{cat:'font',id:'marker',name:'Marqueur',price:10},{cat:'font',id:'bangers',name:'BD',price:12},{cat:'font',id:'orbitron',name:'Futur',price:14},{cat:'font',id:'pixel',name:'Pixel',price:16},{cat:'font',id:'creepster',name:'Horreur',price:20},
+ {cat:'emote',id:'thumb',name:'Pouce',ico:'👍',price:0},{cat:'emote',id:'laugh',name:'Mort de rire',ico:'😂',price:3},{cat:'emote',id:'cool',name:'Cool',ico:'😎',price:4},{cat:'emote',id:'rage',name:'Furieux',ico:'🤬',price:4},{cat:'emote',id:'cry',name:'Larmes',ico:'😭',price:4},{cat:'emote',id:'fire',name:'Feu',ico:'🔥',price:5},{cat:'emote',id:'party',name:'Fête',ico:'🎉',price:5},{cat:'emote',id:'finger',name:'Doigt',ico:'🖕',price:8}];
 const CATS=[['felt','Tapis','🟩'],['back','Dos','🂠'],['frame','Cadres','⭕'],['font','Polices','🔤'],['emote','Émotes','😀']];
 const DEF={back:'classic',felt:'green',frame:'none',font:'classic'};
 const okCos=c=>{const o={};if(c&&typeof c==='object')for(const k of ['back','felt','frame','font']){const v=c[k];if(typeof v==='string'&&SHOP.some(i=>i.cat===k&&i.id===v))o[k]=v}return o};
 const emoIco=id=>(SHOP.find(i=>i.cat==='emote'&&i.id===id)||{}).ico||'';
 const nameHtml=(n,f)=>`<span class="pn"${f&&f!=='classic'?` data-font="${esc(f)}"`:''}>${esc(n)}</span>`;
 const emoBubble=p=>{const e=emoShow[p.id];return e&&e.at&&Date.now()-e.at<3000?`<span class="emo">${emoIco(e.id)}</span>`:''};
-const curCos=()=>{const C=window.CC;return okCos(C&&C.user&&C.me?C.me.eq:null)};
-const isOwned=it=>it.price===0||!!(window.CC&&window.CC.me&&window.CC.me.owned&&window.CC.me.owned[it.cat+'_'+it.id]);
+const curCos=()=>{const C=window.CC;const b=okCos(C&&C.user&&C.me?C.me.eq:null);return dev?Object.assign(b,okCos(devEq)):b};
+const isOwned=it=>it.price===0||!!(dev&&devOwned[it.cat+'_'+it.id])||!!(window.CC&&window.CC.me&&window.CC.me.owned&&window.CC.me.owned[it.cat+'_'+it.id]);
 const coinSvg=sz=>`<svg class="coin" width="${sz||18}" height="${sz||18}" viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="cg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffe9a0"/><stop offset=".55" stop-color="#f3b73a"/><stop offset="1" stop-color="#c98812"/></linearGradient></defs><circle cx="32" cy="32" r="30" fill="url(#cg)" stroke="#a96d08" stroke-width="3"/><circle cx="32" cy="32" r="23.5" fill="none" stroke="#b97a0c" stroke-width="2" opacity=".8"/><g fill="#9a5f06"><rect x="27" y="16" width="10" height="33" rx="5"/><path d="M27 36h-6a5 5 0 0 1-5-5v-8a3.5 3.5 0 0 1 7 0v6h4z"/><path d="M37 32h6a5 5 0 0 0 5-5v-6a3.5 3.5 0 0 0-7 0v4h-4z"/></g><rect x="29.3" y="19" width="2" height="20" rx="1" fill="#ffe9a0" opacity=".85"/></svg>`;
 const baremeHtml=()=>'<ul class="tbl">'+[2,3,4,5].map(n=>'<li><b>'+n+' joueurs</b> : '+Array.from({length:n},(_,r)=>fmt(gainFor(r,n))).join(' · ')+'</li>').join('')+'</ul>';
 const red=c=>c.s==='♥'||c.s==='♦';
@@ -324,9 +317,10 @@ const val=c=>c.r==='JK'?0:c.r==='A'?1:c.r==='R'?(red(c)?0:10):(c.r==='V'||c.r===
 const nm=c=>c.r==='JK'?'🃏':c.r+c.s;
 const esc=t=>String(t).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
 const sh=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
-let S=null,uid,mi=-1,peeks={},looks=0,flashMode=false,sel=null,seenN=0,fresh=false,rev=null,revN=0,myName='',myAv='',msg='',pre='',theme='auto',cardsz='n',animN=null,fl=[],sheetKind='',peerPid={},emoShow={},emoInit=false,emoOpen=false;
+let S=null,uid,mi=-1,peeks={},looks=0,flashMode=false,sel=null,seenN=0,fresh=false,rev=null,revN=0,myName='',myAv='',msg='',pre='',theme='auto',cardsz='n',animN=null,fl=[],sheetKind='',peerPid={},emoShow={},emoInit=false,emoOpen=false,dev=false,devOwned={},devEq={};
 const app=document.getElementById('app'),ovEl=document.getElementById('ov');
 try{myName=localStorage.getItem('cn')||'';myAv=localStorage.getItem('ca')||'';theme=localStorage.getItem('ct')||'auto';cardsz=localStorage.getItem('cs')||'n'}catch(e){}
+try{dev=localStorage.getItem('cdv')==='1';devOwned=JSON.parse(localStorage.getItem('cdo')||'{}');devEq=JSON.parse(localStorage.getItem('cde')||'{}')}catch(e){}
 try{pre=(new URLSearchParams(location.search).get('c')||'').toUpperCase().replace(/[^A-Z]/g,'').slice(0,4)}catch(e){}
 try{uid=localStorage.getItem('cu')}catch(e){}
 if(!uid){uid='g'+Math.random().toString(36).slice(2,12);try{localStorage.setItem('cu',uid)}catch(e){}}
@@ -455,7 +449,15 @@ function openRoom(n){
     else if(e.type!=='peer-unavailable'){msg='Erreur réseau : '+e.type;if(!S){isHost=false;render()}}
   });
 }
+function saveDev(){try{localStorage.setItem('cdv',dev?'1':'0');localStorage.setItem('cdo',JSON.stringify(devOwned));localStorage.setItem('cde',JSON.stringify(devEq))}catch(e){}}
+function toggleDev(){
+  dev=!dev;if(!dev){devOwned={};devEq={}}
+  saveDev();applyTheme();pushProfile();pre='';
+  msg=dev?'🛠️ Mode développeur activé : aucun point ni pièce, achats gratuits non enregistrés.':'Mode développeur désactivé : tout est revenu comme avant.';
+  render();
+}
 function join(){
+  if(document.getElementById('cd').value.trim()==='26082008'){toggleDev();return}
   myName=document.getElementById('nm').value.trim();code=document.getElementById('cd').value.trim().toUpperCase();
   if(!myName){msg='Entre ton prénom pour rejoindre';return render()}
   if(code.length<4){msg='Le code de la partie contient 4 lettres';pre=code;return render()}
@@ -706,6 +708,7 @@ window.onAuth=async function(){
 };
 const getDone=()=>{try{return JSON.parse(localStorage.getItem('cg')||'[]')}catch(e){return []}};
 function checkAward(){
+  if(dev)return;
   if(!S||S.phase!=='end'||!S.gid||!S.rank||mi<0)return;
   const r=S.rank.indexOf(mi),n=S.rank.length;
   if(r<0||(S.flat==null&&n<2))return;
@@ -934,43 +937,54 @@ function boardHtml(rows){
   <p class="mut" style="margin-bottom:8px">Classement mondial · cactus 🌵</p>${body}</div></div>`;
 }
 let mkCat='felt';
-const rarity=it=>it.price>=200?['Légendaire','leg']:it.price>=120?['Épique','epi']:it.price>=80?['Rare','rar']:['Commun','com'];
+const rarity=it=>it.price>=30?['Légendaire','leg']:it.price>=20?['Épique','epi']:it.price>=12?['Rare','rar']:['Commun','com'];
 /* « photo » du jeu : mini-table avec l'objet appliqué */
 function miniTable(o){
   const c=Object.assign({},DEF,curCos(),o||{}),n0=myName||'Toi',bk=c.back==='classic'?'':c.back;
   const emo=o&&o.emote?`<span class="emo">${o.emote}</span>`:'';
-  const cd0=`<div class="c" data-back="${esc(bk)}"></div>`;
-  return `<div class="mt" data-felt="${esc(c.felt)}"><div class="ms">${avHtml(n0,myAv,'av',c.frame)}${nameHtml(n0,c.font)}${emo}</div>
-  <div class="mid">${cd0}<div class="c up">R♠</div></div><div class="row3">${cd0}${cd0}${cd0}</div></div>`;
+  const back=b=>`<div class="c" data-back="${esc(b)}"></div>`;
+  const opp=`<div class="seats n1"><div class="seat opp"><div class="who">${avHtml('Ana','','av')}<div class="wn"><b>${nameHtml('Ana','')}</b><small>5 cartes</small></div></div><div class="cards">${back('').repeat(5)}</div></div></div>`;
+  const ctr=`<div class="center"><span class="dir">↻</span><div class="pile"><div class="c" data-back="${esc(bk)}"></div><span>pioche · 43</span></div><div class="pile"><div class="c up">R♠</div><span>défausse</span></div></div>`;
+  const me=`<div class="seat mine"><div class="who">${avHtml(n0,myAv,'av',c.frame)}${emo}<div class="wn"><b>${nameHtml(n0,c.font)} (toi)</b><small>5 cartes</small></div></div><div class="cards">${back(bk).repeat(5)}</div></div>`;
+  return `<div class="mtw"><div class="mtin"><div class="felt" data-felt="${esc(c.felt)}">${opp}${ctr}${me}</div></div></div>`;
+}
+function fitMini(){
+  try{ovEl.querySelectorAll('.mtw').forEach(w=>{const i=w.firstElementChild;if(!i||!w.clientWidth)return;const k=w.clientWidth/360;i.style.transform='scale('+k+')';w.style.height=Math.ceil(i.offsetHeight*k)+'px'})}catch(e){}
 }
 function marketHtml(mode){
   const eqm=mode==='equip',C=window.CC,u=C&&C.user,title=eqm?'🎨 Ma personnalisation':'🛍️ Marché';
-  const H=bal=>`<div class="ov" onclick="if(event.target===this)closeSheet()"><div class="sheet mk" role="dialog" aria-label="${title}"><div class="mkh"><h2>${title}</h2>${bal||''}<button class="x" onclick="closeSheet()" aria-label="Fermer">✕</button></div>`;
-  if(!CC_ON||!C)return H()+`<p class="mut">Le marché n’est pas encore activé sur ce site.</p></div></div>`;
-  if(!u)return H()+`<p>Connecte-toi pour gagner des Cactus Coins ${coinSvg(16)} et acheter des cosmétiques : tapis, dos de cartes, cadres, polices de pseudo et émotes.</p><button class="go w" style="margin-top:12px" onclick="openSheet('acc')">Se connecter</button></div></div>`;
-  if(!u.emailVerified)return H()+`<p>Vérifie ton e-mail pour utiliser le marché.</p><button class="go w" style="margin-top:12px" onclick="openSheet('acc')">Vérifier mon e-mail</button></div></div>`;
-  const me=C.me||{coins:0,owned:{},eq:{}},eq=Object.assign({},DEF,okCos(me.eq)),kind=eqm?'equip':'market';
+  const H=bal=>`<div class="ov" onclick="if(event.target===this)closeSheet()"><div class="sheet mk" role="dialog" aria-label="${title}"><div class="mkh"><h2>${title}${dev?' <span class="tag dvb">DEV</span>':''}</h2>${bal||''}<button class="x" onclick="closeSheet()" aria-label="Fermer">✕</button></div>`;
+  if(!dev){
+    if(!CC_ON||!C)return H()+`<p class="mut">Le marché n’est pas encore activé sur ce site.</p></div></div>`;
+    if(!u)return H()+`<p>Connecte-toi pour gagner des Cactus Coins ${coinSvg(16)} et acheter des cosmétiques : tapis, dos de cartes, cadres, polices de pseudo et émotes.</p><button class="go w" style="margin-top:12px" onclick="openSheet('acc')">Se connecter</button></div></div>`;
+    if(!u.emailVerified)return H()+`<p>Vérifie ton e-mail pour utiliser le marché.</p><button class="go w" style="margin-top:12px" onclick="openSheet('acc')">Vérifier mon e-mail</button></div></div>`;
+  }
+  const me=(C&&C.me)||{coins:0,owned:{},eq:{}},eq=Object.assign({},DEF,curCos()),kind=eqm?'equip':'market',coins=dev?1e9:(me.coins||0);
   const tabs=`<div class="tabs">`+CATS.map(([k,l,ic])=>`<button class="${mkCat===k?'on':'s'}" onclick="mkCat='${k}';openSheet('${kind}')">${ic} ${l}</button>`).join('')+`</div>`;
   const list=SHOP.filter(i=>i.cat===mkCat&&(!eqm||isOwned(i)));
   const items=list.map(it=>{
-    const own=isOwned(it),isE=it.cat==='emote',on=!isE&&eq[it.cat]===it.id,need=it.price-(me.coins||0),[rl,rc]=rarity(it);
+    const own=isOwned(it),isE=it.cat==='emote',on=!isE&&eq[it.cat]===it.id,need=it.price-coins,[rl,rc]=rarity(it);
+    const buy=`<button class="w" onclick="buyItem('${it.cat}','${it.id}',this)">${dev?'Gratuit':coinSvg(14)+' '+it.price} · Acheter</button>`;
     let btn;
-    if(isE)btn=own?`<button class="s w" disabled>${eqm?'Utilisable en partie 😀':'Possédé ✓'}</button>`:need>0?`<button class="s w" disabled>${coinSvg(14)} ${it.price}</button>`:`<button class="w" onclick="buyItem('${it.cat}','${it.id}',this)">${coinSvg(14)} ${it.price} · Acheter</button>`;
+    if(isE)btn=own?`<button class="s w" disabled>${eqm?'Utilisable en partie 😀':'Possédé ✓'}</button>`:need>0?`<button class="s w" disabled>${coinSvg(14)} ${it.price}</button>`:buy;
     else if(on)btn=`<button class="s w" disabled>Équipé ✓</button>`;
     else if(own)btn=`<button class="go w" onclick="equipItem('${it.cat}','${it.id}',this)">Équiper</button>`;
-    else btn=need>0?`<button class="s w" disabled>${coinSvg(14)} ${it.price}</button>`:`<button class="w" onclick="buyItem('${it.cat}','${it.id}',this)">${coinSvg(14)} ${it.price} · Acheter</button>`;
+    else btn=need>0?`<button class="s w" disabled>${coinSvg(14)} ${it.price}</button>`:buy;
     const prev=miniTable(isE?{emote:it.ico}:{[it.cat]:it.id});
     const nmH=it.cat==='font'?nameHtml(it.name,it.id):esc(it.name);
-    return `<div class="shopi ${rc}${on?' on':''}"><span class="rb">${rl}</span>${prev}<b>${nmH}</b><small>${!own&&need>0?'Il te manque '+need:''}</small>${btn}</div>`}).join('')||'<p class="mut" style="grid-column:1/-1">Rien ici pour l’instant. Va faire un tour au marché 🛍️</p>';
+    return `<div class="shopi ${rc}${on?' on':''}"><span class="rb">${rl}</span>${prev}<b>${nmH}</b><small>${!own&&need>0?'Il te manque '+Math.round(need):''}</small>${btn}</div>`}).join('')||'<p class="mut" style="grid-column:1/-1">Rien ici pour l’instant. Va faire un tour au marché 🛍️</p>';
   const foot=eqm?`<button class="s w" onclick="openSheet('market')">🛍️ Aller au marché</button>`:`<button class="s w" onclick="openSheet('equip')">🎨 Mon équipement</button>`;
-  return H(`<div class="chip2">${coinSvg(22)} ${fmt(me.coins||0)}</div>`)+(eqm?`<div style="margin-bottom:10px">${miniTable()}</div>`:'')+tabs+`<div class="shop">${items}</div>${foot}</div></div>`;
+  const chip=`<div class="chip2">${coinSvg(22)} ${dev?'∞':Math.round(me.coins||0)}</div>`;
+  return H(chip)+(dev?`<div class="devb">🛠️ Mode développeur : achats gratuits, rien n’est enregistré sur ton compte.</div>`:'')+(eqm?`<div style="margin-bottom:10px">${miniTable()}</div>`:'')+tabs+`<div class="shop">${items}</div>${foot}</div></div>`;
 }
 async function buyItem(cat,id,btn){
   const it=SHOP.find(i=>i.cat===cat&&i.id===id);if(!it)return;
+  if(dev){devOwned[cat+'_'+id]=true;saveDev();toast('Acheté (mode dev) : '+it.name);openSheet(sheetKind);return}
   await busy(btn,async()=>{try{await window.CC.buy(cat+'_'+id,it.price);toast('Acheté : '+it.name+' 🎉')}catch(e){console.error(e);toast('Achat impossible')}});
   if(sheetKind==='market'||sheetKind==='equip')openSheet(sheetKind);
 }
 async function equipItem(cat,id,btn){
+  if(dev){devEq[cat]=id;saveDev();applyTheme();pushProfile();if(!S)render();openSheet(sheetKind);return}
   await busy(btn,async()=>{try{const eq=Object.assign({},okCos(window.CC.me&&window.CC.me.eq));eq[cat]=id;await window.CC.equip(eq);applyTheme();pushProfile();if(!S)render()}catch(e){console.error(e);toast('Impossible d’équiper')}});
   if(sheetKind==='market'||sheetKind==='equip')openSheet(sheetKind);
 }
@@ -980,7 +994,7 @@ async function openBoard(){
   try{const rows=await window.CC.top();if(sheetKind==='board')ovEl.innerHTML=boardHtml(rows)}
   catch(e){console.error(e);if(sheetKind==='board')ovEl.innerHTML=boardHtml('err')}
 }
-function openSheet(k){sheetKind=k;ovEl.innerHTML=k==='rules'?RULES:k==='acc'?accHtml():k==='market'?marketHtml('shop'):k==='equip'?marketHtml('equip'):setHtml()}
+function openSheet(k){sheetKind=k;ovEl.innerHTML=k==='rules'?RULES:k==='acc'?accHtml():k==='market'?marketHtml('shop'):k==='equip'?marketHtml('equip'):setHtml();fitMini()}
 function closeSheet(){sheetKind='';ovEl.innerHTML=''}
 function accStrip(){
   if(!CC_ON)return '';
@@ -990,7 +1004,7 @@ function accStrip(){
   return `<button class="acc" onclick="openSheet('acc')"><span class="av" style="background:var(--cactus)">🔐</span><span><b>Se connecter</b><small>Gagne des cactus et des Cactus Coins</small></span></button>`;
 }
 
-function head(){return `<div class="top"><div class="brand">🌵 Cactus</div><div class="tools"><button class="ib" onclick="openSheet('market')" aria-label="Marché" title="Marché">🛍️</button><button class="ib" onclick="openBoard()" aria-label="Classement" title="Classement">🏆</button><button class="ib" onclick="openSheet('rules')" aria-label="Règles" title="Règles">📖</button><button class="ib" onclick="openSheet('set')" aria-label="Réglages" title="Réglages">⚙️</button>${S?'<button class="ib" onclick="askLeave()" aria-label="Quitter" title="Quitter">🚪</button>':''}</div></div>`}
+function head(){return `<div class="top"><div class="brand">🌵 Cactus${dev?' <span class="tag dvb">DEV</span>':''}</div><div class="tools"><button class="ib" onclick="openSheet('market')" aria-label="Marché" title="Marché">🛍️</button><button class="ib" onclick="openBoard()" aria-label="Classement" title="Classement">🏆</button><button class="ib" onclick="openSheet('rules')" aria-label="Règles" title="Règles">📖</button><button class="ib" onclick="openSheet('set')" aria-label="Réglages" title="Réglages">⚙️</button>${S?'<button class="ib" onclick="askLeave()" aria-label="Quitter" title="Quitter">🚪</button>':''}</div></div>`}
 
 function render(){
   fresh=!!(S&&S.ev&&S.ev.n!==seenN);
@@ -1002,7 +1016,7 @@ function render(){
     <input id="nm" placeholder="Ton prénom" maxlength="14" autocomplete="nickname" value="${esc(myName)}" oninput="myName=this.value"></div>
     <button class="go w" onclick="create()">Créer une partie</button>
     <div class="or">ou</div>
-    <input id="cd" placeholder="CODE" maxlength="4" autocapitalize="characters" autocomplete="off" value="${esc(pre)}" oninput="pre=this.value">
+    <input id="cd" placeholder="CODE" maxlength="8" autocapitalize="characters" autocomplete="off" value="${esc(pre)}" oninput="pre=this.value">
     <button class="w" onclick="join()">Rejoindre une partie</button>
     <div class="err" role="status">${esc(msg)}</div></div>
     <div class="feat"><div><b>2 à 5</b>joueurs</div><div><b>0 €</b>sans compte</div><div><b>Tout</b>appareil</div></div>
@@ -1035,6 +1049,7 @@ function render(){
     if(S.flat!=null){status=S.rank&&S.rank.includes(mi)?'Un joueur a quitté · +'+fmt(S.flat)+' 🌵 · +'+coinsFor(S.flat)+' §':'Tu as quitté la partie : aucun gain'}
     else{const rk=S.rank?S.rank.indexOf(mi):-1,rn=S.rank?S.rank.length:0;
       status=(rk>=0&&rn>=2)?(rk===0?'🏆 Victoire ! ':'Tu finis '+ord(rk)+' · ')+'+'+fmt(gainFor(rk,rn))+' 🌵 · +'+coinsFor(gainFor(rk,rn))+' §':(S.loser!=null?'🌵 Perdant : '+S.players[S.loser].name:'Fin de partie')}
+    if(dev)status+=' · mode dev : non compté';
   }
   const pts=p=>p.cards.reduce((t,c)=>t+val(c),0);
   const seat=(i,cls)=>{
@@ -1065,7 +1080,7 @@ function render(){
   }
   if(!me.left)bar+=`<button class="${emoOpen?'on':'s'}" onclick="emoOpen=!emoOpen;render()" aria-label="Émotes">😀</button>`;
   if(me.left)bar+=`<button class="go" onclick="leaveGame()">Retour à l’accueil</button>`;
-  if(ended&&CC_ON&&!(window.CC&&window.CC.user)&&S.rank&&S.rank.includes(mi)&&(S.flat!=null||S.rank.length>=2))bar+=`<button class="s" onclick="openSheet('acc')">🔐 Connecte-toi pour garder tes 🌵</button>`;
+  if(ended&&!dev&&CC_ON&&!(window.CC&&window.CC.user)&&S.rank&&S.rank.includes(mi)&&(S.flat!=null||S.rank.length>=2))bar+=`<button class="s" onclick="openSheet('acc')">🔐 Connecte-toi pour garder tes 🌵</button>`;
   if(ended)bar+=host?'<button class="go" onclick="again()">Rejouer</button>':S.players.some(q=>q.id===S.host&&q.left)?'<span class="mut">L’hôte a quitté : retourne à l’accueil.</span>':'<span class="mut">L’hôte peut relancer une partie.</span>';
   if(bar)h+=`<div class="bar">${bar}</div>`;
   if(emoOpen){const oe=SHOP.filter(i=>i.cat==='emote'&&isOwned(i));h+=`<div class="emorow">${oe.map(e=>`<button class="emb" onclick="sendEmote('${e.id}')" aria-label="${esc(e.name)}">${e.ico}</button>`).join('')}</div>`}
